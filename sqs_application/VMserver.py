@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, redirect, url_for
+from flask import Flask, request, Response,redirect, url_for
 from werkzeug import secure_filename
 from subprocess import Popen,PIPE
 UPLOAD_FOLDER = '/data/'
@@ -29,19 +29,17 @@ def containers_index():
 # Inspect specific container
 @app.route('/containers/<id>', methods=['GET'])
 def containers_show(id):
-    return Response(response=docker('inspect', id), mimetype="application/json")
+    return Response(response=docker('inspect', id,), mimetype="application/json")
 
 # Inspect specific container
 @app.route('/restart/<id>', methods=['GET'])
 def containers_restart(id):
     return Response(response=docker('restart', id), mimetype="application/json")
 
-
 # List all images
 @app.route('/images', methods=['GET'])
 def images_index():
     return Response(response=docker('images'), mimetype="text/html")
-
 
 def docker(*args):
     cmd = ['docker']
@@ -49,11 +47,13 @@ def docker(*args):
         cmd.append(sub)
     process = Popen(cmd, stdout=PIPE, stderr=PIPE)
     stdout, _ = process.communicate()
-    return stdout
-
-
-
-
+#    return stdout
+    return """
+    <!doctype html>
+    <title>Docker Images</title>
+    <h1>Docker Images header</h1>
+    <pre>%s</pre>
+    """ % stdout
 
 #@app.route("/listimages")
 #def listimages():
@@ -74,7 +74,6 @@ def show_post(post_id):
     # show the post with the given id, the id is an integer
     return 'Post %d' % post_id
 
-
 # Route that will process the file upload
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -84,6 +83,5 @@ def upload():
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         return redirect(url_for('index'))
 
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0",port=5000)
+    app.run(host="0.0.0.0",port=80)
