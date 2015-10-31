@@ -1,4 +1,4 @@
-# This script created a queue
+# This script created a queue and deletes the message
 #
 # Author - Paul Doyle Aug 2013
 #
@@ -25,8 +25,13 @@ q = conn.get_queue(args.qname)
 try:
 	m = Message()
 	m = q.read(60)
-        str1 = m.get_body()
-        print "Message read = ", str1
+	str1 = m.get_body()
+	print "Message read = ", str1
 except:
 	print "Could not read message"
-
+print boto.Version
+try:
+	q.delete_message(m)
+	print "message deleted from the queue"
+except:
+	print "Could not delete message"

@@ -17,12 +17,13 @@ ADD /sqs_application /sqs_application
 RUN pip install -r /sqs_application/requirements.txt
 RUN pip install boto
 
+
 # Expose listener port
 EXPOSE 5000
+RUN mkdir /data
 
 # Set the default directory where CMD will execute
 WORKDIR /sqs_application
-RUN mkdir /data
 # Set the default command to execute    
 # when creating a new container
 CMD python server.py

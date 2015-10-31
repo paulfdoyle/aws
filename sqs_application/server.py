@@ -1,7 +1,16 @@
 import os
+import boto.sqs
+import boto.sqs.queue
+from boto.sqs.message import Message
+from boto.sqs.connection import SQSConnection
+from boto.exception import SQSError
+import sys
 from flask import Flask, request, redirect, url_for
 from werkzeug import secure_filename
 from subprocess import Popen,PIPE
+sys.path.append('/data')
+from keys import access_key_id, secret_access_key
+
 UPLOAD_FOLDER = '/data/'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
@@ -21,10 +30,15 @@ def index():
     <p>%s</p>
     """ % "<br>".join(os.listdir(app.config['UPLOAD_FOLDER'],))
 
-# List all containers
-@app.route('/containers', methods=['GET'])
-def containers_index():
-    return Response(response=docker('ps', '-a'), mimetype="text/html")
+# List all queues
+@app.route('/queues', methods=['GET'])
+def queues_index():
+
+     conn = boto.sqs.connect_to_region("eu-west-1", aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key)
+     rs = conn.get_all_queues()
+     for q in rs:
+	print q.id
+    return q.id
 
 # Inspect specific container
 @app.route('/containers/<id>', methods=['GET'])
